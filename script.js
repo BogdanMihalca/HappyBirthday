@@ -209,75 +209,86 @@ window.addEventListener('resize', function () {
 
 
 
-
-
 let scene, camera, renderer, textMesh;
 
-    // Initialize scene, camera, and renderer
-    function init() {
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 5;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-      scene.add(ambientLight);
-      
-      const pointLight = new THREE.PointLight(0xffffff, 1);
-      pointLight.position.set(10, 10, 10);
-      scene.add(pointLight);
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+  scene.add(ambientLight);
 
-      // Load font and create text
-      const loader = new THREE.FontLoader();
-      loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-        const textGeometry = new THREE.TextGeometry('Happy Birthday, Ciprian!', {
-          font: font,
-          size: 0.4, // Reduced size
-          height: 0.1, // Reduced height
-          curveSegments: 12,
-          bevelEnabled: true,
-          bevelThickness: 0.03,
-          bevelSize: 0.02,
-          bevelOffset: 0,
-          bevelSegments: 3
-        });
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(10, 10, 10);
+  scene.add(pointLight);
 
-        const textMaterial = new THREE.MeshPhongMaterial({ color: 0xffa500, shininess: 70 });
-        textMesh = new THREE.Mesh(textGeometry, textMaterial);
+  // Load font and create responsive text
+  const loader = new THREE.FontLoader();
+  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    createTextMesh(font);
+    animate();
+  });
 
-        // Center the text
-        textGeometry.computeBoundingBox();
-        const centerOffset = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
-        textMesh.position.x = centerOffset;
-        textMesh.position.y = -0.5; // Lower text for better centering
+  window.addEventListener('resize', onWindowResize, false);
+}
 
-        scene.add(textMesh);
-        animate();
-      });
+// Function to create the text mesh
+function createTextMesh(font) {
+  const textSize = Math.min(window.innerWidth, window.innerHeight) * 0.0003; // Adjusted text size to 2% of the smaller dimension
 
-      window.addEventListener('resize', onWindowResize, false);
-    }
+  const textGeometry = new THREE.TextGeometry('Happy Birthday, Ciprian!', {
+    font: font,
+    size: textSize, // Use calculated smaller size
+    height: textSize * 0.25, // Adjust height based on size
+    curveSegments: 12,
+    bevelEnabled: true,
+    bevelThickness: textSize * 0.05,
+    bevelSize: textSize * 0.03,
+    bevelOffset: 0,
+    bevelSegments: 3,
+  });
 
-    // Update the renderer and camera when window is resized
-    function onWindowResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+  const textMaterial = new THREE.MeshPhongMaterial({ color: 0xffa500, shininess: 70 });
+  if (textMesh) scene.remove(textMesh); // Remove previous textMesh if it exists
+  textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
-    // Animate the text
-    function animate() {
-      requestAnimationFrame(animate);
+  // Center the text
+  textGeometry.computeBoundingBox();
+  const centerOffset = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
+  textMesh.position.x = centerOffset;
+  textMesh.position.y = -0.5;
 
-      // Gentle floating and rotation for smoother animation
-      textMesh.position.y = Math.sin(Date.now() * 0.001) * 0.3 - 0.5; // Floating effect with reduced amplitude
+  scene.add(textMesh);
+}
 
-      renderer.render(scene, camera);
-    }
+// Update the renderer and camera when window is resized
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
-    // Initialize the scene
-    init();
+  // Recreate the text with new size
+  const loader = new THREE.FontLoader();
+  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    createTextMesh(font);
+  });
+}
+
+// Animate the text
+function animate() {
+  requestAnimationFrame(animate);
+
+  // Gentle floating and rotation for smoother animation
+  textMesh.position.y = Math.sin(Date.now() * 0.001) * 0.3 - 0.5; // Floating effect with reduced amplitude
+
+  renderer.render(scene, camera);
+}
+
+// Initialize the scene
+init();
