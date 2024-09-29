@@ -147,7 +147,7 @@ function addBalloonWithDelay(index, delay) {
 // Function to add all balloons with delays
 function addBalloonsWithDelay() {
     const delayIncrement = 200; // Delay between each balloon (200 ms)
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 15; i++) {
         addBalloonWithDelay(i, i * delayIncrement);
     }
 }
